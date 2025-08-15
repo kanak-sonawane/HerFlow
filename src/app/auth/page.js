@@ -1,60 +1,108 @@
-'use client';
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { supabase } from '@/utils/supabaseClient';
+"use client";
 
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { supabase } from "../../utils/supabaseClient";
 
 export default function AuthPage() {
   const router = useRouter();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [isLogin, setIsLogin] = useState(true);
+  const searchParams = useSearchParams();
+  const [mode, setMode] = useState("login");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleAuth = async () => {
-    const { error } = isLogin
-      ? await supabase.auth.signInWithPassword({ email, password })
-      : await supabase.auth.signUp({ email, password });
+  useEffect(() => {
+    const m = searchParams.get("mode");
+    if (m === "signup" || m === "login") {
+      setMode(m);
+    }
+  }, [searchParams]);
 
-    if (error) alert(error.message);
-    else if (isLogin) router.push('/');
-    else alert('Sign-up successful. Please log in.');
+  const handleAuth = async (e) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+
+    try {
+      let result;
+      if (mode === "signup") {
+        result = await supabase.auth.signUp({ email, password });
+      } else {
+        result = await supabase.auth.signInWithPassword({ email, password });
+      }
+
+      if (result.error) {
+        setError(result.error.message);
+      } else {
+        router.push("/"); // Redirect to home page
+      }
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <main className="flex flex-col items-center justify-center min-h-screen bg-white px-4 py-10 text-center">
-      <div className="w-full max-w-md bg-pink-50 rounded-xl shadow-lg p-6 md:p-10">
-        <h2 className="text-2xl md:text-3xl font-semibold text-pink-600 mb-6">
-          {isLogin ? 'Login to HerFlow' : 'Sign Up for HerFlow'}
-        </h2>
+    <div className="flex justify-center items-center h-screen bg-gray-100">
+      <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-sm">
+        <h1 className="text-2xl font-bold mb-4 text-center">
+          {mode === "login" ? "Login" : "Sign Up"}
+        </h1>
+        {error && <p className="text-red-500 text-sm mb-3">{error}</p>}
 
-        <input
-          className="w-full border border-pink-300 px-4 py-2 rounded mb-4 focus:outline-none focus:ring-2 focus:ring-pink-300"
-          type="email"
-          placeholder="Email"
-          onChange={(e) => setEmail(e.target.value)}
-        />
+        <form onSubmit={handleAuth} className="space-y-4">
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full p-2 border rounded"
+            required
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full p-2 border rounded"
+            required
+          />
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-pink-500 hover:bg-pink-600 text-white py-2 rounded"
+          >
+            {loading ? "Processing..." : mode === "login" ? "Login" : "Sign Up"}
+          </button>
+        </form>
 
-        <input
-          className="w-full border border-pink-300 px-4 py-2 rounded mb-4 focus:outline-none focus:ring-2 focus:ring-pink-300"
-          type="password"
-          placeholder="Password"
-          onChange={(e) => setPassword(e.target.value)}
-        />
-
-        <button
-          onClick={handleAuth}
-          className="w-full bg-pink-500 hover:bg-pink-600 text-white px-4 py-2 rounded-full mb-3 transition"
-        >
-          {isLogin ? 'Login' : 'Sign Up'}
-        </button>
-
-        <button
-          onClick={() => setIsLogin(!isLogin)}
-          className="text-sm text-pink-500 underline"
-        >
-          {isLogin ? 'Don’t have an account? Sign up' : 'Already have an account? Login'}
-        </button>
+        <p className="mt-4 text-center text-sm">
+          {mode === "login" ? (
+            <>
+              Don’t have an account?{" "}
+              <button
+                onClick={() => setMode("signup")}
+                className="text-pink-500 hover:underline"
+              >
+                Sign up
+              </button>
+            </>
+          ) : (
+            <>
+              Already have an account?{" "}
+              <button
+                onClick={() => setMode("login")}
+                className="text-pink-500 hover:underline"
+              >
+                Login
+              </button>
+            </>
+          )}
+        </p>
       </div>
-    </main>
+    </div>
   );
 }
