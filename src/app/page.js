@@ -1,8 +1,11 @@
-"use client";
+// src/app/page.js
+'use client';
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { supabase } from "../utils/supabaseClient"; // your Supabase init
+import { supabase } from "../utils/supabaseClient"; 
+import Hero from './components/hero';
+import Features from './components/features';
 
 export default function Home() {
   const [loading, setLoading] = useState(true);
@@ -27,7 +30,14 @@ export default function Home() {
 
   return (
     <div>
-      <h1>Welcome to HerFlow, {user?.email}</h1>
+      {/* Hero + Features only on homepage */}
+      <Hero />
+      <Features />
+
+      {/* Welcome message */}
+      <h1 className="text-center mt-6 text-2xl font-bold">
+        Welcome to HerFlow, {user?.email}
+      </h1>
     </div>
   );
 }

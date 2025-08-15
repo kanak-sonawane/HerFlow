@@ -1,5 +1,7 @@
-import AuthPage from '../auth/page';
+// src/app/signup/page.js
+'use client';
+import AuthForm from '../auth/AuthForm';
 
-export default function SignupWrapper() {
-  return <AuthPage initialMode="signup" />;
+export default function SignupPage() {
+  return <AuthForm initialMode="signup" />;
 }

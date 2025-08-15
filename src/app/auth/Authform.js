@@ -1,30 +1,22 @@
-"use client";
+// src/app/auth/AuthForm.js
+'use client';
 
-import { useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { supabase } from "../../utils/supabaseClient";
 
-export default function AuthPage() {
+export default function AuthForm({ initialMode = "login" }) {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const [mode, setMode] = useState("login");
+  const [mode, setMode] = useState(initialMode);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    const m = searchParams.get("mode");
-    if (m === "signup" || m === "login") {
-      setMode(m);
-    }
-  }, [searchParams]);
-
   const handleAuth = async (e) => {
     e.preventDefault();
     setError("");
     setLoading(true);
-
     try {
       let result;
       if (mode === "signup") {
@@ -33,11 +25,8 @@ export default function AuthPage() {
         result = await supabase.auth.signInWithPassword({ email, password });
       }
 
-      if (result.error) {
-        setError(result.error.message);
-      } else {
-        router.push("/"); // Redirect to home page
-      }
+      if (result.error) setError(result.error.message);
+      else router.push("/");
     } catch (err) {
       setError(err.message);
     } finally {
@@ -52,7 +41,6 @@ export default function AuthPage() {
           {mode === "login" ? "Login" : "Sign Up"}
         </h1>
         {error && <p className="text-red-500 text-sm mb-3">{error}</p>}
-
         <form onSubmit={handleAuth} className="space-y-4">
           <input
             type="email"
@@ -78,7 +66,6 @@ export default function AuthPage() {
             {loading ? "Processing..." : mode === "login" ? "Login" : "Sign Up"}
           </button>
         </form>
-
         <p className="mt-4 text-center text-sm">
           {mode === "login" ? (
             <>

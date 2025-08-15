@@ -3,15 +3,15 @@ import React from "react";
 const Features = () => {
   const featuresList = [
     {
-      title: "📊 Track Your Cycle",
+      title: "Track Your Cycle",
       description: "Keep tabs on your period, mood, symptoms, and more.",
     },
     {
-      title: "👩‍💬 Forum & Community",
+      title: "Forum & Community",
       description: "Join discussions, ask questions, and support others.",
     },
     {
-      title: "🤝 Partner Mode",
+      title: "Partner Mode",
       description: "Help partners understand cycles and offer better support.",
     },
   ];
